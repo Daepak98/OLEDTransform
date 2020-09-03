@@ -16,7 +16,14 @@ def outline_edges(path):
 def draw_bounding_box():
     pass
 
-if __name__ == "__main__":
+def do_all_tests():
     test_images = 'test_images/'
     for path in os.listdir(test_images):
-        im = outline_edges(test_images+path)
+        do_one(test_images+path)
+
+def do_one(path):
+    im = outline_edges(path)
+
+if __name__ == "__main__":
+    # do_all_tests()
+    do_one('test_images/'+'onam.png')
