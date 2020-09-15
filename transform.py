@@ -1,43 +1,25 @@
 import os
 import sys
+
+import numpy as np
+import matplotlib.pyplot as plt
+
+from matplotlib import cm
 from multiprocessing import Pool
 from time import monotonic
-
-# from matplotlib.pyplot import imshow, axis
-import numpy as np
-import statistics as st
 from imageio import imread, imwrite
-from skimage import color, feature, filters
+from skimage import color, filters
+from scipy import ndimage
 
-
-def detect_edges(image, sigma=None):
-    edges = np.zeros(image.shape)
-    for i, row in enumerate(image):
-        highlight_these = highlight_points(row, sigma)
-        for val in highlight_these:
-            edges[i][val] = 1
-    return edges
-
-def highlight_points(vals, sigma=None):
-    diffs = []
-    indices = []
-    length = len(vals)
-    for i in range(length-1):
-        diff = abs(vals[i+1] - vals[i])
-        diffs.append(diff)
-    sd = sigma if sigma else st.pstdev(diffs)
-    sd_coverage = 4
-    m = st.mean(diffs)
-    tolerance = [m-sd_coverage*sd, m+sd_coverage*sd] 
-    for i, val in enumerate(diffs):
-        if val < min(tolerance) or val > max(tolerance):
-            indices.append(i)
-    return indices
-
-def decide_cutoff(row, threshold):
-    for i in range(len(row)):
-        row[i] = row[i] if row[i] > threshold else 0
-    return row
+def plotimages(*ims, title=None):
+    fig = plt.figure()
+    if title:
+        plt.title(title)
+    for i, im in enumerate(ims):
+        ax = fig.add_subplot(1, len(ims), i+1)
+        ax.axis('off')
+        ax.imshow(im, cmap=cm.gray)
+    plt.show()
 
 def map_regions(image):
     return ndimage.label(image)
@@ -55,19 +37,16 @@ def do_one(path):
     print("Starting ", path)
     im = imread(path)
     gray_im = color.rgb2gray(im)
-
-    # outlined_im = detect_edges(gray_im, sigma=3.0)
-    # outlined_im = detect_edges(gray_im) * 255
-    # outlined_im = feature.canny(gray_im) * 255
-    outlined_im = filters.sobel(gray_im)
     
-    mapped, num_regions = map_regions(outlined_im)
+    outlined_im = filters.sobel(gray_im)
+    threshed = outlined_im > filters.threshold_otsu(outlined_im)
+    threshed = (threshed.astype('uint8'))*255
 
-    mapped = mapped
-
+    final_output = threshed
+    plt.imshow(final_output, cmap=cm.gray)
     output = path.split('/')[-1].split('.png')[0]
     output = 'output/'+output+'_output.png'
-    imwrite(output, region_mapped.astype('uint8'))
+    imwrite(output, final_output)
 
     print("Finished: ", path)
 
@@ -79,6 +58,6 @@ if __name__ == "__main__":
             do_one(path)
     else:
         # do_all_tests()
-        do_one('test_images/'+'journey.png')
+        do_one('test_images/'+'ricos_grappler.png')
     print("Finished All.")
     print("Elapsed Time ", (monotonic() - start)/60)
