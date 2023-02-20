@@ -27,10 +27,10 @@ class OLEDUNet(nn.Module):
         self.ConvEn12 = nn.Conv2d(64, 64, kernel_size=3, padding=1)
         self.BNEn12 = nn.BatchNorm2d(64, momentum=bn_momentum)
 
-        self.ConvEn21 = nn.Conv2d(64, 128, kernel_size=3, padding=1)
-        self.BNEn21 = nn.BatchNorm2d(128, momentum=bn_momentum)
-        self.ConvEn22 = nn.Conv2d(128, 128, kernel_size=3, padding=1)
-        self.BNEn22 = nn.BatchNorm2d(128, momentum=bn_momentum)
+        # self.ConvEn21 = nn.Conv2d(64, 128, kernel_size=3, padding=1)
+        # self.BNEn21 = nn.BatchNorm2d(128, momentum=bn_momentum)
+        # self.ConvEn22 = nn.Conv2d(128, 128, kernel_size=3, padding=1)
+        # self.BNEn22 = nn.BatchNorm2d(128, momentum=bn_momentum)
 
         # self.ConvEn31 = nn.Conv2d(128, 256, kernel_size=3, padding=1)
         # self.BNEn31 = nn.BatchNorm2d(256, momentum=bn_momentum)
@@ -76,10 +76,10 @@ class OLEDUNet(nn.Module):
         # self.ConvDe31 = nn.Conv2d(256, 128, kernel_size=3, padding=1)
         # self.BNDe31 = nn.BatchNorm2d(128, momentum=bn_momentum)
 
-        self.ConvDe22 = nn.Conv2d(128, 128, kernel_size=3, padding=1)
-        self.BNDe22 = nn.BatchNorm2d(128, momentum=bn_momentum)
-        self.ConvDe21 = nn.Conv2d(128, 64, kernel_size=3, padding=1)
-        self.BNDe21 = nn.BatchNorm2d(64, momentum=bn_momentum)
+        # self.ConvDe22 = nn.Conv2d(128, 128, kernel_size=3, padding=1)
+        # self.BNDe22 = nn.BatchNorm2d(128, momentum=bn_momentum)
+        # self.ConvDe21 = nn.Conv2d(128, 64, kernel_size=3, padding=1)
+        # self.BNDe21 = nn.BatchNorm2d(64, momentum=bn_momentum)
 
         self.ConvDe12 = nn.Conv2d(64, 64, kernel_size=3, padding=1)
         self.BNDe12 = nn.BatchNorm2d(64, momentum=bn_momentum)
@@ -96,11 +96,11 @@ class OLEDUNet(nn.Module):
         x, ind1 = self.MaxEn(x)
         size1 = x.size()
 
-        # Stage 2
-        x = F.relu(self.BNEn21(self.ConvEn21(x)))
-        x = F.relu(self.BNEn22(self.ConvEn22(x)))
-        x, ind2 = self.MaxEn(x)
-        size2 = x.size()
+        # # Stage 2
+        # x = F.relu(self.BNEn21(self.ConvEn21(x)))
+        # x = F.relu(self.BNEn22(self.ConvEn22(x)))
+        # x, ind2 = self.MaxEn(x)
+        # size2 = x.size()
 
         # # Stage 3
         # x = F.relu(self.BNEn31(self.ConvEn31(x)))
@@ -142,10 +142,10 @@ class OLEDUNet(nn.Module):
         # x = F.relu(self.BNDe32(self.ConvDe32(x)))
         # x = F.relu(self.BNDe31(self.ConvDe31(x)))
 
-        # Stage 2
-        x = self.MaxDe(x, ind2, output_size=size1)
-        x = F.relu(self.BNDe22(self.ConvDe22(x)))
-        x = F.relu(self.BNDe21(self.ConvDe21(x)))
+        # # Stage 2
+        # x = self.MaxDe(x, ind2, output_size=size1)
+        # x = F.relu(self.BNDe22(self.ConvDe22(x)))
+        # x = F.relu(self.BNDe21(self.ConvDe21(x)))
 
         # Stage 1
         x = self.MaxDe(x, ind1)
@@ -209,8 +209,10 @@ class Train():
 
             for j, data in enumerate(trainloader, 1):
                 images, labels = data
+                labels = torch.argmax(labels, dim=1)
                 images = images.to(device)
                 labels = labels.to(device)
+                # print(images.shape, labels.shape)
                 optimizer.zero_grad()
                 output = model(images)
                 loss = loss_fn(output, labels)
@@ -255,6 +257,5 @@ class OLEDDataset(Dataset):
 
         data = (image_raw.type(torch.float32),
                 image_oled.type(torch.float32))
-        # print([i.shape for i in data])
 
         return data

@@ -56,23 +56,13 @@ if __name__ == "__main__":
     output_dir = "output/"
     model_path = "oledunet_weights.pth.tar"
 
-    # model = OLEDUNet()
-    # # test_image = torchvision.io.read_image(os.path.join(rgb_folder, "Joker.png"),
-    # #                                        mode=torchvision.io.ImageReadMode.RGB)
-    # # test_image = test_image.type(torch.float32)
-    # # test_image = test_image.reshape((1,) + test_image.shape)
-    # # print(test_image)
-    # # result = model(test_image)
-    # # print(result)
-    # # torchvision.io.write_png(result[0].type(torch.uint8),
-    # #                          filename=os.path.join(output_dir, "test.png"))
-
     model = 0
     retrain = False
     if (not os.path.exists(model_path)) or retrain:
         print(f"Retraining Model: GPU Available: {torch.cuda.is_available()}")
         ds = OLEDDataset(rgb_folder, oled_folder)
-        kwargs = {'num_workers': 1, 'pin_memory': True} if torch.cuda.is_available() else { 'num_workers': 4}
+        kwargs = {'num_workers': 1, 'pin_memory': True} if torch.cuda.is_available() else {
+            'num_workers': 4}
         OLEDDataloader = DataLoader(ds, shuffle=True, **kwargs)
         start = monotonic()
         model, x_test, Y_test = Train.Train(OLEDDataloader)
@@ -103,3 +93,14 @@ if __name__ == "__main__":
     #         model, im[1], output_dir + output_name)
     #     plotimages(output_im, title="Processed Images")
     #     print("Writing {} Time: ".format(output_name), monotonic() - start)
+
+    model = OLEDUNet()
+    test_image = torchvision.io.read_image(os.path.join(rgb_folder, "Joker.png"),
+                                           mode=torchvision.io.ImageReadMode.RGB)
+    test_image = test_image.type(torch.float32)
+    test_image = test_image.reshape((1,) + test_image.shape)
+    print(test_image)
+    result = model(test_image)
+    print(result)
+    torchvision.io.write_png(result[0].type(torch.uint8),
+                             filename=os.path.join(output_dir, "test.png"))
