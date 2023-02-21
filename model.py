@@ -209,12 +209,15 @@ class Train():
 
             for j, data in enumerate(trainloader, 1):
                 images, labels = data
+                print(images.dtype, labels.dtype)
                 labels = torch.argmax(labels, dim=1)
                 images = images.to(device)
                 labels = labels.to(device)
                 # print(images.shape, labels.shape)
                 optimizer.zero_grad()
                 output = model(images)
+                print(output.shape, labels.shape)
+                print(output.dtype, labels.dtype)
                 loss = loss_fn(output, labels)
                 loss.backward()
                 optimizer.step()
@@ -235,6 +238,8 @@ class Train():
             'state_dict': model.state_dict(),
             'optimizer': optimizer.state_dict()
         }, path)
+
+        return model
 
 
 class OLEDDataset(Dataset):

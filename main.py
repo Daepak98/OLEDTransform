@@ -54,9 +54,9 @@ if __name__ == "__main__":
     oled_folder = "input/oled/"
     rgb_folder = "input/rgb/"
     output_dir = "output/"
-    model_path = "oledunet_weights.pth.tar"
+    model_path = "./oledunet_weights.pth.tar"
 
-    model = 0
+    model = OLEDUNet()
     retrain = False
     if (not os.path.exists(model_path)) or retrain:
         print(f"Retraining Model: GPU Available: {torch.cuda.is_available()}")
@@ -65,7 +65,7 @@ if __name__ == "__main__":
             'num_workers': 4}
         OLEDDataloader = DataLoader(ds, shuffle=True, **kwargs)
         start = monotonic()
-        model, x_test, Y_test = Train.Train(OLEDDataloader)
+        model = Train.Train(OLEDDataloader)
         print("Training Time: ", monotonic() - start)
     with open(model_path, 'rb') as f:
         model_data = torch.load(f)
