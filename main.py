@@ -1,18 +1,10 @@
 import os
-import sys
 
-import numpy as np
 import matplotlib.pyplot as plt
-import pickle as pkl
 
-from matplotlib import cm, colors
-from multiprocessing import Pool
 from time import monotonic
-from imageio import imread, imwrite
 # from skimage import color
 import torch
-from torch import nn, optim
-from torch.nn import functional as F
 from torch.utils.data import DataLoader
 import torchvision
 from time import monotonic
@@ -100,7 +92,9 @@ if __name__ == "__main__":
     test_image = test_image.type(torch.float32)
     test_image = test_image.reshape((1,) + test_image.shape)
     print(test_image)
-    result = model(test_image)
+    result = model(test_image)[0]
+    result = ((result - result.min()) / (result.max() - result.min())) * 255
+    result[result < 0.6*255] = 0
     print(result)
-    torchvision.io.write_png(result[0].type(torch.uint8),
+    torchvision.io.write_png(result.type(torch.uint8),
                              filename=os.path.join(output_dir, "test.png"))

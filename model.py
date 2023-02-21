@@ -152,7 +152,8 @@ class OLEDUNet(nn.Module):
         x = F.relu(self.BNDe12(self.ConvDe12(x)))
         x = self.ConvDe11(x)
 
-        x = F.softmax(x, dim=1)
+        # x = F.softmax(x, dim=1)
+        # x = ((x - x.min()) / (x.max() - x.min())) * 255
 
         return x
 
@@ -160,7 +161,7 @@ class OLEDUNet(nn.Module):
 class Train():
     default_hps = {
         "batch_size": 4,
-        "epochs": 10,
+        "epochs": 5,
         "learning_rate": 0.005,
         "sgd_momentum": 0.9,
         "bn_momentum": 0.5,
@@ -184,7 +185,7 @@ class Train():
         model.to(device)
         optimizer = optim.SGD(model.parameters(),
                               lr=hyperparams['learning_rate'], momentum=hyperparams['sgd_momentum'])
-        loss_fn = nn.CrossEntropyLoss()
+        loss_fn = nn.L1Loss()
         run_epoch = hyperparams['epochs']
 
         if path == None:
@@ -209,15 +210,15 @@ class Train():
 
             for j, data in enumerate(trainloader, 1):
                 images, labels = data
-                print(images.dtype, labels.dtype)
-                labels = torch.argmax(labels, dim=1)
+                # print(images.dtype, labels.dtype)
                 images = images.to(device)
                 labels = labels.to(device)
                 # print(images.shape, labels.shape)
                 optimizer.zero_grad()
                 output = model(images)
-                print(output.shape, labels.shape)
-                print(output.dtype, labels.dtype)
+                # print(output.shape, labels.shape)
+                # print(output.dtype, labels.dtype)
+                # TODO: Fix so that it's no longer classification, but regression/similarity in pixel values :ok:
                 loss = loss_fn(output, labels)
                 loss.backward()
                 optimizer.step()
@@ -260,7 +261,9 @@ class OLEDDataset(Dataset):
         image_oled = torchvision.io.read_image(
             self.oled_ims_paths[idx], mode=torchvision.io.ImageReadMode.GRAY)
 
-        data = (image_raw.type(torch.float32),
-                image_oled.type(torch.float32))
+        image_raw = image_raw.type(torch.float32) / 255
+        image_oled = image_oled.type(torch.float32) / 255
+
+        data = (image_raw, image_oled)
 
         return data
