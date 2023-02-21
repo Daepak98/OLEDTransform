@@ -1,2 +1,8 @@
+# Env Configs
 .vscode/*
 .spyproject/*
+venv/*
+__pycache__/*
+
+# Generated Files
+*.tar
